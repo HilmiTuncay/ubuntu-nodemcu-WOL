@@ -1,0 +1,11 @@
+#!/bin/sh
+exec tail -n +3 $0
+# Windows GRUB Entry - Ubuntu'dan sonra 2. sırada görünür
+# Bu dosya /etc/grub.d/11_windows olarak kopyalanır
+
+menuentry "Windows" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root ${WINDOWS_EFI_UUID}
+    chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+}

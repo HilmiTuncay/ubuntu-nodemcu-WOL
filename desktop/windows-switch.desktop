@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Windows'a Geç
+Name[en]=Switch to Windows
+Comment=Bilgisayarı Windows ile yeniden başlat
+Comment[en]=Reboot computer to Windows
+Exec=/usr/local/bin/switch-to-windows-gui.sh
+Icon=system-restart
+Terminal=false
+Categories=System;
+Keywords=windows;reboot;switch;geç;

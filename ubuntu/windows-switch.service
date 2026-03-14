@@ -1,0 +1,13 @@
+[Unit]
+Description=Windows Switch HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/windows-switch-server.py
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

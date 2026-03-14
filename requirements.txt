@@ -1,0 +1,64 @@
+# Ubuntu NodeMCU WOL - Gereksinimler
+# https://github.com/HilmiTuncay/ubuntu-nodemcu-WOL
+
+# ============================================
+# DONANIM GEREKSİNİMLERİ
+# ============================================
+# - NodeMCU (ESP8266) veya benzeri ESP8266 tabanlı kart
+# - Dual boot PC (Ubuntu + Windows)
+# - WoL destekli anakart (BIOS'ta etkinleştirilmeli)
+# - Ethernet bağlantısı (WoL için - WiFi ile çalışmaz)
+
+# ============================================
+# UBUNTU GEREKSİNİMLERİ
+# ============================================
+# Minimum: Ubuntu 20.04 LTS
+# Python 3.8+ (Ubuntu ile birlikte gelir)
+
+# Opsiyonel paketler (GUI için):
+# sudo apt install zenity
+
+# ============================================
+# ARDUINO / NODEMCU GEREKSİNİMLERİ
+# ============================================
+
+# Arduino IDE veya arduino-cli
+# İndir: https://www.arduino.cc/en/software
+
+# ESP8266 Board URL (Arduino IDE → Preferences):
+# https://arduino.esp8266.com/stable/package_esp8266com_index.json
+
+# Board: esp8266:esp8266:nodemcuv2 (NodeMCU 1.0)
+
+# Gerekli Arduino Kütüphaneleri:
+# - UniversalTelegramBot (1.3.0+)
+# - ArduinoJson (7.0.0+)
+
+# Kütüphane kurulumu (arduino-cli):
+# arduino-cli lib install "UniversalTelegramBot" "ArduinoJson"
+
+# ============================================
+# AĞ GEREKSİNİMLERİ
+# ============================================
+# - Sabit IP adresleri (DHCP reservation önerilir):
+#   - Ubuntu PC: örn. 192.168.1.234
+#   - Windows PC: örn. 192.168.1.233 (aynı makine, farklı OS)
+#   - NodeMCU: örn. 192.168.1.199
+#
+# - Açık portlar:
+#   - Ubuntu: 22 (SSH), 8888 (HTTP server)
+#   - Windows: 3389 (RDP)
+#   - NodeMCU: 80 (OTA web arayüzü)
+
+# ============================================
+# TELEGRAM GEREKSİNİMLERİ
+# ============================================
+# 1. @BotFather ile bot oluştur → BOT_TOKEN al
+# 2. @userinfobot ile Chat ID öğren → CHAT_ID al
+
+# ============================================
+# KURULUM KOMUTLARI
+# ============================================
+# git clone https://github.com/HilmiTuncay/ubuntu-nodemcu-WOL.git
+# cd ubuntu-nodemcu-WOL
+# sudo bash setup.sh
