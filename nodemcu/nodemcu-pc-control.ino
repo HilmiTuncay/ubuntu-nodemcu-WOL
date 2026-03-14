@@ -42,8 +42,8 @@ const char* password = "WIFI_PASSWORD";    // WiFi şifresi
 #define CHAT_ID "YOUR_CHAT_ID"             // Chat ID (@userinfobot'dan al)
 
 // PC MAC Adresi (WOL için) - PC'nin MAC adresini gir
-// Örnek: 08:BF:B8:1B:3F:99 → {0x08, 0xBF, 0xB8, 0x1B, 0x3F, 0x99}
-byte target_mac[] = {0x08, 0xBF, 0xB8, 0x1B, 0x3F, 0x99};
+// Örnek: 00:1A:2B:3C:4D:5E → {0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E}
+byte target_mac[] = {0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E};
 
 // IP Adresleri - Kendi ağına göre ayarla
 IPAddress ipWindows(192, 168, 1, 233);     // Windows IP
