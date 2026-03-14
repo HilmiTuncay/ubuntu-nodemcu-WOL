@@ -30,7 +30,7 @@ fi
 # Script dizini
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo -e "${YELLOW}[1/7]${NC} Windows EFI UUID tespit ediliyor..."
+echo -e "${YELLOW}[1/9]${NC} Windows EFI UUID tespit ediliyor..."
 
 # Windows EFI partition UUID'sini bul
 WINDOWS_UUID=""
@@ -68,7 +68,7 @@ fi
 
 echo -e "${GREEN}  Windows EFI UUID: $WINDOWS_UUID${NC}"
 
-echo -e "${YELLOW}[2/7]${NC} GRUB yapılandırılıyor..."
+echo -e "${YELLOW}[2/9]${NC} GRUB yapılandırılıyor..."
 
 # Mevcut 40_custom'ı yedekle
 if [ -f /etc/grub.d/40_custom ]; then
@@ -97,11 +97,22 @@ if [ -f /etc/grub.d/40_custom ]; then
     sed -i '/menuentry.*[Ww]indows/,/^}/d' /etc/grub.d/40_custom
 fi
 
+echo -e "${GREEN}  GRUB entry oluşturuldu${NC}"
+
+echo -e "${YELLOW}[3/9]${NC} GRUB submenu devre dışı bırakılıyor..."
+
+# GRUB_DISABLE_SUBMENU ekle (Advanced Options submenu'yü kaldırır, Windows 2. sıraya geçer)
+if grep -q "^GRUB_DISABLE_SUBMENU" /etc/default/grub; then
+    sed -i 's/^GRUB_DISABLE_SUBMENU=.*/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+else
+    echo 'GRUB_DISABLE_SUBMENU=y' >> /etc/default/grub
+fi
+
 # GRUB güncelle
 update-grub
 echo -e "${GREEN}  GRUB güncellendi. Sıra: 1. Ubuntu, 2. Windows${NC}"
 
-echo -e "${YELLOW}[3/7]${NC} HTTP server kuruluyor..."
+echo -e "${YELLOW}[4/9]${NC} HTTP server kuruluyor..."
 
 # Server dosyasını kopyala
 cp "$SCRIPT_DIR/ubuntu/windows-switch-server.py" /usr/local/bin/
@@ -113,7 +124,7 @@ chmod +x /usr/local/bin/reboot-to-windows.sh
 
 echo -e "${GREEN}  Server dosyaları kopyalandı${NC}"
 
-echo -e "${YELLOW}[4/7]${NC} Systemd servisi kuruluyor..."
+echo -e "${YELLOW}[5/9]${NC} Systemd servisi kuruluyor..."
 
 # Servis dosyası
 cp "$SCRIPT_DIR/ubuntu/windows-switch.service" /etc/systemd/system/
@@ -125,7 +136,7 @@ systemctl restart windows-switch.service
 
 echo -e "${GREEN}  Servis kuruldu ve başlatıldı${NC}"
 
-echo -e "${YELLOW}[5/7]${NC} Sudoers ayarlanıyor..."
+echo -e "${YELLOW}[6/9]${NC} Sudoers ayarlanıyor..."
 
 # Shutdown için şifresiz sudo izni
 echo "ALL ALL=(ALL) NOPASSWD: /sbin/shutdown, /usr/local/bin/reboot-to-windows.sh" > /etc/sudoers.d/nodemcu-wol
@@ -133,7 +144,7 @@ chmod 440 /etc/sudoers.d/nodemcu-wol
 
 echo -e "${GREEN}  Sudoers ayarlandı${NC}"
 
-echo -e "${YELLOW}[6/7]${NC} Masaüstü uygulaması kuruluyor..."
+echo -e "${YELLOW}[7/9]${NC} Masaüstü uygulaması kuruluyor..."
 
 # GUI script
 cp "$SCRIPT_DIR/desktop/switch-to-windows-gui.sh" /usr/local/bin/
@@ -158,12 +169,41 @@ fi
 
 echo -e "${GREEN}  Masaüstü uygulaması kuruldu${NC}"
 
-echo -e "${YELLOW}[7/7]${NC} Servis durumu kontrol ediliyor..."
+echo -e "${YELLOW}[8/9]${NC} Telegram boot bildirimi ayarlanıyor..."
+
+# .env dosyası varsa kopyala
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    cp "$SCRIPT_DIR/.env" /etc/nodemcu-wol.env
+    chmod 600 /etc/nodemcu-wol.env
+    echo -e "${GREEN}  .env dosyası /etc/nodemcu-wol.env olarak kopyalandı ✓${NC}"
+else
+    # .env yoksa manuel sor
+    echo -e "${BLUE}Telegram bot bildirimi için bilgiler gerekli.${NC}"
+    echo -e "${BLUE}(Bu bilgiler NodeMCU .ino dosyasındaki ile aynı olmalı)${NC}"
+    read -p "Telegram Bot Token: " TELEGRAM_BOT_TOKEN
+    read -p "Telegram Chat ID: " TELEGRAM_CHAT_ID
+
+    if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+        cat > /etc/nodemcu-wol.env << EOF
+BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+CHAT_ID=$TELEGRAM_CHAT_ID
+EOF
+        chmod 600 /etc/nodemcu-wol.env
+        echo -e "${GREEN}  Boot bildirimi ayarlandı ✓${NC}"
+    else
+        echo -e "${YELLOW}  Telegram bilgileri girilmedi, boot bildirimi atlandı.${NC}"
+    fi
+fi
+
+systemctl daemon-reload
+systemctl restart windows-switch.service
+
+echo -e "${YELLOW}[9/9]${NC} Servis durumu kontrol ediliyor..."
 
 if systemctl is-active --quiet windows-switch.service; then
-    echo -e "${GREEN}  Servis çalışıyor ✓${NC}"
+    echo -e "${GREEN}  windows-switch servisi çalışıyor ✓${NC}"
 else
-    echo -e "${RED}  Servis çalışmıyor! Logları kontrol edin: journalctl -u windows-switch.service${NC}"
+    echo -e "${RED}  windows-switch servisi çalışmıyor! Log: journalctl -u windows-switch.service${NC}"
 fi
 
 echo ""
@@ -180,6 +220,9 @@ echo "  /reboot-windows - Windows'a geç"
 echo "  /shutdown       - Sistemi kapat"
 echo "  /idle-time      - Boşta kalma süresi"
 echo "  /ping           - Bağlantı testi"
+echo ""
+echo -e "${GREEN}Telegram:${NC}"
+echo "  Boot bildirimi: Ubuntu açılınca Telegram'dan mesaj gelir"
 echo ""
 echo -e "${GREEN}Masaüstü:${NC}"
 echo "  'Windows'a Geç' uygulaması eklendi"

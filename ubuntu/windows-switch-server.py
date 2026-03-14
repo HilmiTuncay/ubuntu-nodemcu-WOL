@@ -15,6 +15,11 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import subprocess
 import os
 import time
+import json
+import socket
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode
+from datetime import datetime
 
 
 def get_idle_minutes():
@@ -127,7 +132,51 @@ class Handler(BaseHTTPRequestHandler):
         pass  # Sessiz çalışsın
 
 
+def send_boot_notification():
+    """
+    Ubuntu açıldığında Telegram'a bildirim gönder.
+    BOT_TOKEN ve CHAT_ID environment variable'larından okunur.
+    """
+    bot_token = os.environ.get('BOT_TOKEN', '')
+    chat_id = os.environ.get('CHAT_ID', '')
+
+    if not bot_token or not chat_id:
+        print("BOT_TOKEN/CHAT_ID ayarlanmamış, boot bildirimi atlandı.")
+        return
+
+    try:
+        ip_addr = subprocess.run(
+            ['hostname', '-I'], capture_output=True, text=True, timeout=5
+        ).stdout.strip().split()[0]
+    except Exception:
+        ip_addr = 'bilinmiyor'
+
+    hostname = socket.gethostname()
+    now = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+
+    message = (
+        f"🐧 *Ubuntu Açıldı!*\n\n"
+        f"🖥️ Hostname: {hostname}\n"
+        f"🌐 IP: {ip_addr}\n"
+        f"📅 Tarih: {now}"
+    )
+
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = urlencode({
+            'chat_id': chat_id,
+            'text': message,
+            'parse_mode': 'Markdown'
+        }).encode()
+        req = Request(url, data=data)
+        urlopen(req, timeout=10)
+        print("Boot bildirimi gönderildi.")
+    except Exception as e:
+        print(f"Boot bildirimi gönderilemedi: {e}")
+
+
 if __name__ == '__main__':
+    send_boot_notification()
     server = HTTPServer(('0.0.0.0', 8888), Handler)
     print("Server running on port 8888...")
     server.serve_forever()

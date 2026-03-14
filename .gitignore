@@ -1,3 +1,7 @@
+# Environment files (credentials)
+.env
+*.env
+
 # Build files
 build/
 *.bin
@@ -12,6 +16,10 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
 
 # Backup files
 *.backup

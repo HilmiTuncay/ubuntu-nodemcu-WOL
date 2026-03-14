@@ -7,6 +7,7 @@ Telegram üzerinden bilgisayarı uzaktan açma, kapatma ve Ubuntu/Windows arası
 - **WOL (Wake-on-LAN):** Kapalı bilgisayarı uzaktan aç
 - **Dual Boot Geçişi:** Ubuntu↔Windows geçişi Telegram'dan tek komutla
 - **Uzaktan Kapatma:** Ubuntu'yu Telegram'dan kapat
+- **Boot Bildirimi:** Ubuntu açılınca Telegram'dan bildirim gelir
 - **Aktivite Kontrolü:** PC boşta kalınca otomatik bildirim (30 dk)
 - **OTA Güncelleme:** NodeMCU'yu kablosuz güncelle
 - **Masaüstü Uygulaması:** "Windows'a Geç" butonu
@@ -177,7 +178,7 @@ ubuntu-nodemcu-WOL/
 ├── nodemcu/
 │   └── nodemcu-pc-control.ino
 ├── ubuntu/
-│   ├── windows-switch-server.py
+│   ├── windows-switch-server.py  # HTTP server + boot bildirimi
 │   ├── windows-switch.service
 │   ├── reboot-to-windows.sh
 │   └── 11_windows           # GRUB entry
@@ -212,6 +213,14 @@ grep -E "menuentry" /boot/grub/grub.cfg
 ### WOL çalışmıyor
 - BIOS'ta WoL etkin mi?
 - Ethernet kablosu bağlı mı? (WiFi ile WoL çalışmaz)
+
+### Boot bildirimi gelmiyor
+```bash
+sudo systemctl status boot-notify.service
+sudo journalctl -u boot-notify.service
+# Manuel test:
+sudo /usr/local/bin/boot-notify.sh
+```
 
 ## Lisans
 

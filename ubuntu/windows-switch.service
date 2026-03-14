@@ -1,13 +1,26 @@
 [Unit]
 Description=Windows Switch HTTP Server
-After=network.target
+After=network.target graphical.target
+Wants=graphical.target
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 /usr/local/bin/windows-switch-server.py
 Restart=always
 RestartSec=5
-User=root
+User=hilmi
+StandardOutput=journal
+StandardError=journal
+
+# Python buffering'i kapat (log'lar hemen görünsün)
+Environment="PYTHONUNBUFFERED=1"
+
+# X11 erişimi için (idle time ölçümü)
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/hilmi/.Xauthority"
+
+# Telegram bildirimi için (.env dosyasından)
+EnvironmentFile=-/etc/nodemcu-wol.env
 
 [Install]
 WantedBy=multi-user.target
